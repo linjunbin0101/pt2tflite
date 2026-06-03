@@ -8,6 +8,7 @@ Usage: python3 pt2tflite.py
 
 import shutil
 import sys
+import time
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
@@ -23,8 +24,10 @@ def find_pt_files():
 
 def convert_pt_to_tflite(pt_path: Path):
     """Convert a single .pt file to .tflite."""
+    start_time = time.time()
     print(f"\n{'='*60}")
     print(f"Converting: {pt_path.name}")
+    print(f"  Source: {pt_path}")
     print(f"{'='*60}")
 
     from ultralytics import YOLO
@@ -40,20 +43,22 @@ def convert_pt_to_tflite(pt_path: Path):
     if tflite_in_dir.exists():
         target_path = pt_path.with_suffix('.tflite')
         shutil.copy2(tflite_in_dir, target_path)
-        print(f"\n✅ Conversion complete: {pt_path.name} -> {target_path.name}")
-        print(f"   Model size: {target_path.stat().st_size / 1024 / 1024:.1f} MB")
+        elapsed = time.time() - start_time
+        print(f"\nConversion complete: {pt_path.name} -> {target_path.name}")
+        print(f"  Source: {pt_path}")
+        print(f"  Output: {target_path}")
+        print(f"  Size: {target_path.stat().st_size / 1024 / 1024:.1f} MB")
+        print(f"  Elapsed: {elapsed:.1f}s")
     else:
-        print(f"\n⚠️ TFLite file not found: {output_path}")
+        print(f"\nTFLite file not found: {output_path}")
 
-    # Cleanup intermediate files
+    # Cleanup intermediate files (keep calibration data for caching)
     saved_model_dir = pt_path.parent / f"{pt_path.stem}_saved_model"
     if saved_model_dir.exists():
         shutil.rmtree(saved_model_dir)
     onnx_file = pt_path.with_suffix('.onnx')
     if onnx_file.exists():
         onnx_file.unlink()
-    for calib_file in ROOT_DIR.glob("calibration_image_sample_data_*.npy*"):
-        calib_file.unlink(missing_ok=True)
 
     return target_path if tflite_in_dir.exists() else None
 
