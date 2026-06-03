@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PyTorch model files
+*.pt
+*.pth
+
+# Generated files
+*.onnx
+*.tflite
+*_saved_model/
+calibration_image_sample_data_*.npy*
